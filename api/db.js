@@ -103,7 +103,11 @@ async function initDb() {
             
             console.log("MongoDB connection established and seeded successfully!");
         } catch (e) {
-            console.error("MongoDB Connection Failed! Falling back to Local JSON database.", e);
+            console.error("MongoDB Connection Failed!", e);
+            if (process.env.VERCEL) {
+                throw new Error("MongoDB Connection Failed: " + e.message);
+            }
+            console.log("Falling back to Local JSON database.");
         }
     } else {
         console.log("No MONGODB_URI environment variable detected. Running in Local JSON File Database mode.");

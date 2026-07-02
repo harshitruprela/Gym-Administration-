@@ -16,20 +16,23 @@ app.use(express.json());
 // Serve static frontend files from 'public' (for local testing/standalone server runs)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Initialize DB Connection
-let dbInitialized = false;
-db.initDb().then(() => {
-    dbInitialized = true;
-}).catch(err => {
-    console.error("Critical database initialisation error:", err);
-});
+// Initialize DB Connection (Serverless-friendly lazy loading)
+let initPromise = null;
+function ensureDbConnected() {
+    if (!initPromise) {
+        initPromise = db.initDb();
+    }
+    return initPromise;
+}
 
 // Middleware to ensure DB is initialized before handling requests
-app.use((req, res, next) => {
-    if (dbInitialized) {
+app.use(async (req, res, next) => {
+    try {
+        await ensureDbConnected();
         next();
-    } else {
-        res.status(503).json({ error: "Database initialization in progress. Please try again shortly." });
+    } catch (err) {
+        console.error("Critical database initialisation error:", err);
+        res.status(503).json({ error: "Database initialization failed. Please check your configuration." });
     }
 });
 
