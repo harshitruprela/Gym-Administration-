@@ -59,17 +59,16 @@ Members are dynamically evaluated on reads relative to the current calendar day:
 4. **Open the browser**:
    Navigate to the URL printed in the terminal (e.g. `http://localhost:3000`).
 
----
+## 🔐 Setup Credentials & Environment Variables
 
-## 🔐 Credentials for Testing
+To access the application, you must define the administrator credentials. For local testing, create a `.env` file in the project root (this file is ignored by Git and will remain secure):
 
-### Manager / Administrator Account
-- **Email**: `admin@ironnation.com`
-- **Password**: `admin123`
+```env
+ADMIN_EMAIL=your-admin-email@example.com
+ADMIN_PASSWORD=your-secure-password
+```
 
-### Customer / Athlete Account
-- **Email**: `marcus.v@example.com`
-- **Password / Member ID**: `APX-3829` (The Member ID serves as their password)
+For customer logins, once a new member is registered via the administration panel, they can log in to the portal using their registered **Email** and their assigned **Member ID** (e.g. `APX-XXXX`) as their password.
 
 ---
 

@@ -1,7 +1,7 @@
 {
-  "name": "apexgym-server-app",
+  "name": "gym-administration",
   "version": "1.0.0",
-  "description": "ApexGym Full-Stack Administration and Customer Portal ready for Vercel Serverless",
+  "description": "Gym Administration Full-Stack Administration and Customer Portal ready for Vercel Serverless",
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
