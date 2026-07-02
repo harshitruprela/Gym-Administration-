@@ -84,19 +84,19 @@ async function initDb() {
             const checkinsColl = mongoDb.collection('checkins');
             
             const membersCount = await membersColl.countDocuments();
-            if (membersCount === 0) {
+            if (membersCount === 0 && defaultMembers.length > 0) {
                 await membersColl.insertMany(defaultMembers);
                 console.log("Seeded default members in MongoDB.");
             }
             
             const plansCount = await plansColl.countDocuments();
-            if (plansCount === 0) {
+            if (plansCount === 0 && defaultPlans.length > 0) {
                 await plansColl.insertMany(defaultPlans);
                 console.log("Seeded default membership plans in MongoDB.");
             }
             
             const checkinsCount = await checkinsColl.countDocuments();
-            if (checkinsCount === 0) {
+            if (checkinsCount === 0 && defaultCheckins.length > 0) {
                 await checkinsColl.insertMany(defaultCheckins);
                 console.log("Seeded default checkin logs in MongoDB.");
             }
