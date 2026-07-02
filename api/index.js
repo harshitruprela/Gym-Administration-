@@ -63,14 +63,17 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ error: "Email and password are required." });
         }
         
-        // 1. Check Admin Hardcoded Credentials
-        if (email.toLowerCase() === 'admin@ironnation.com' && password === 'admin123') {
+        // 1. Check Admin Credentials (customizable via env variables for production security)
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@ironnation.com';
+        const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+        
+        if (email.toLowerCase() === adminEmail.toLowerCase() && password === adminPassword) {
             return res.json({
                 success: true,
                 role: 'admin',
                 user: {
                     name: 'Gym Manager',
-                    email: 'admin@ironnation.com'
+                    email: adminEmail
                 }
             });
         }
