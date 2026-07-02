@@ -1,4 +1,4 @@
-# Iron Nation Gym - Full-Stack Administration Portal
+# Gym-Administration - Full-Stack Administration Portal
 
 A modern, responsive, and secure full-stack gym administration web application featuring a premium high-energy **Crimson Red & Dark Steel** glassmorphic interface. It is designed to be both customer-centric (for marking attendance, viewing streaks, and checking membership progress) and manager-centric (for administrative overview, manual desk check-ins, member directory CRUD, and plan management).
 
@@ -86,9 +86,9 @@ For customer logins, once a new member is registered via the administration pane
 ### Part 2: Deploy Backend & Frontend (Vercel)
 1. Push this project folder to your GitHub repository.
 2. Sign in to [Vercel](https://vercel.com) using your GitHub account.
-3. Import the `iron-nation-gym` repository.
+3. Import the `Gym-Administration-` repository.
 4. Add the following **Environment Variables**:
    - `MONGODB_URI`: *Your Atlas connection string*
-   - `ADMIN_EMAIL`: *Your custom manager email* (Optional - defaults to `admin@ironnation.com`)
-   - `ADMIN_PASSWORD`: *Your custom manager password* (Optional - defaults to `admin123`)
+   - `ADMIN_EMAIL`: *Your custom manager email* (Optional - defaults to `admin@xxx.com`)
+   - `ADMIN_PASSWORD`: *Your custom manager password* (Optional - defaults to `adminxxx`)
 5. Click **Deploy**. Vercel will host the app and provide a live URL!
