@@ -249,11 +249,13 @@ function renderCustomerPortal() {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     document.getElementById("cust-expiry-date").textContent = expiry.toLocaleDateString('en-US', options);
     
-    // Render progress bar (based on mock 30-day timeline logic)
-    const startDate = new Date(expiry);
-    startDate.setMonth(startDate.getMonth() - (plan.duration || 1));
-    const totalDays = Math.max(1, Math.round((expiry - startDate) / (1000 * 60 * 60 * 24)));
-    const elapsedDays = Math.max(0, Math.round((SYSTEM_TODAY - startDate) / (1000 * 60 * 60 * 24)));
+    // Render progress bar (based on real start date)
+    const start = member.startDate ? new Date(member.startDate) : new Date(expiry);
+    if (!member.startDate) {
+        start.setMonth(start.getMonth() - (plan.duration || 1));
+    }
+    const totalDays = Math.max(1, Math.round((expiry - start) / (1000 * 60 * 60 * 24)));
+    const elapsedDays = Math.max(0, Math.round((SYSTEM_TODAY - start) / (1000 * 60 * 60 * 24)));
     let percentage = Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)));
     
     if (member.status === 'expired') {
@@ -877,6 +879,13 @@ function openMemberModal(memberId = null) {
         document.getElementById("member-plan-select").value = m.planId;
         document.getElementById("member-status-select").value = m.status;
         
+        // Populate start date (with fallback deduced from expiry date - plan duration)
+        let deducedStart = new Date(m.expiryDate);
+        const plan = state.plans.find(p => p.id === m.planId) || { duration: 1 };
+        deducedStart.setMonth(deducedStart.getMonth() - plan.duration);
+        const startDateVal = m.startDate || formatDateYYYYMMDD(deducedStart);
+        document.getElementById("member-start-date").value = startDateVal;
+        
         // Select avatar color radio
         const colorRadio = form.querySelector(`input[name="avatar-color"][value="${m.avatarColor}"]`);
         if (colorRadio) colorRadio.checked = true;
@@ -884,6 +893,7 @@ function openMemberModal(memberId = null) {
         // Register mode
         title.textContent = "Register Gym Member";
         document.getElementById("edit-member-id").value = "";
+        document.getElementById("member-start-date").value = formatDateYYYYMMDD(SYSTEM_TODAY);
     }
     
     modal.classList.add("show");
@@ -900,6 +910,7 @@ async function handleMemberFormSubmit(event) {
     const name = document.getElementById("member-fullname").value;
     const phone = document.getElementById("member-phone").value;
     const email = document.getElementById("member-email").value;
+    const startDate = document.getElementById("member-start-date").value;
     const planId = document.getElementById("member-plan-select").value;
     const status = document.getElementById("member-status-select").value;
     const avatarColor = document.querySelector('input[name="avatar-color"]:checked').value;
@@ -919,10 +930,11 @@ async function handleMemberFormSubmit(event) {
                     avatarColor
                 };
                 
-                // If plan changed, adjust expiry date
-                if (m.planId !== planId) {
+                // If plan or start date changed, adjust expiry date
+                if (m.planId !== planId || m.startDate !== startDate) {
                     updatedFields.planId = planId;
-                    const newExp = new Date(SYSTEM_TODAY);
+                    updatedFields.startDate = startDate;
+                    const newExp = new Date(startDate);
                     newExp.setMonth(newExp.getMonth() + selectedPlan.duration);
                     updatedFields.expiryDate = formatDateYYYYMMDD(newExp);
                 }
@@ -938,7 +950,7 @@ async function handleMemberFormSubmit(event) {
                         expiringDate.setDate(expiringDate.getDate() + 5);
                         updatedFields.expiryDate = formatDateYYYYMMDD(expiringDate);
                     } else if (status === 'active') {
-                        const activeDate = new Date();
+                        const activeDate = new Date(startDate);
                         activeDate.setMonth(activeDate.getMonth() + selectedPlan.duration);
                         updatedFields.expiryDate = formatDateYYYYMMDD(activeDate);
                     }
@@ -953,7 +965,7 @@ async function handleMemberFormSubmit(event) {
         } else {
             // Create new member
             const newId = "APX-" + Math.floor(1000 + Math.random() * 9000);
-            const expDate = new Date(SYSTEM_TODAY);
+            const expDate = new Date(startDate);
             if (status === 'expired') {
                 expDate.setDate(expDate.getDate() - 1);
             } else if (status === 'expiring') {
@@ -967,6 +979,7 @@ async function handleMemberFormSubmit(event) {
                 name: name,
                 email: email,
                 phone: phone,
+                startDate: startDate,
                 planId: planId,
                 expiryDate: formatDateYYYYMMDD(expDate),
                 status: status,
