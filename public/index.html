@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iron Nation Gym - Premium Administration & Customer Portal</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Global Header -->
+        <header class="global-header">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i data-lucide="dumbbell"></i>
+                </div>
+                <h1>Iron<span>Nation</span></h1>
+            </div>
+            
+            <div class="header-actions">
+                <!-- Logged In User Indicator -->
+                <div id="user-display-badge" class="profile-swapper" style="display: none; padding-right: 0.5rem;">
+                    <span id="user-display-name" style="color: white; font-weight: 600; font-size: 0.9rem; font-family: 'Outfit', sans-serif;">Guest</span>
+                </div>
+                
+                <!-- Logout Button -->
+                <button id="btn-logout" class="secondary-btn" style="display: none;" onclick="performLogout()">
+                    <i data-lucide="log-out"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- PORTAL CONTENTS -->
+        <main class="main-content">
+            
+            <!-- ================= AUTHENTICATION PORTAL ================= -->
+            <section id="portal-auth" class="portal-section active">
+                <div class="auth-wrapper">
+                    <div class="glass-card auth-card">
+                        <div class="auth-logo">
+                            <div class="logo-icon">
+                                <i data-lucide="dumbbell"></i>
+                            </div>
+                            <h2>Iron<span>Nation</span></h2>
+                            <p>Member Portal Access</p>
+                        </div>
+                        
+                        <form id="login-form" onsubmit="handleLoginSubmit(event)">
+                            <div id="auth-error" class="auth-error-msg" style="display: none;">
+                                <i data-lucide="alert-circle"></i>
+                                <span id="auth-error-text">Invalid login credentials.</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="login-email">Email Address</label>
+                                <input type="email" id="login-email" required placeholder="john@example.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="login-password">Password / Member ID</label>
+                                <input type="password" id="login-password" required placeholder="••••••••">
+                            </div>
+                            
+                            <button type="submit" class="primary-btn btn-full">
+                                <i data-lucide="log-in"></i> Sign In
+                            </button>
+                        </form>
+                        
+                        <div class="auth-hints">
+                            <p><strong>Customer Login:</strong> Use registered Email & Member ID (e.g., <code>marcus.v@example.com</code> / <code>APX-3829</code>)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ================= CUSTOMER PORTAL ================= -->
+            <section id="portal-customer" class="portal-section">
+                <div class="customer-dashboard">
+                    <!-- Welcome Hero Card -->
+                    <div class="hero-card">
+                        <div class="hero-content">
+                            <h2 class="welcome-title">Welcome back, <span id="cust-welcome-name">Athlete</span>!</h2>
+                            <p class="welcome-subtitle">Consistency is key. Ready to crush today's workout?</p>
+                            <div class="streak-badge">
+                                <i data-lucide="flame" class="streak-icon"></i>
+                                <span class="streak-value"><strong id="cust-streak-count">0</strong> Day Streak</span>
+                            </div>
+                        </div>
+                        <div class="hero-visual">
+                            <div class="circle-graphic"></div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Workspace Grid -->
+                    <div class="portal-grid">
+                        
+                        <!-- Check-In / Attendance Card -->
+                        <div class="glass-card check-in-card">
+                            <div class="card-header">
+                                <div class="header-title">
+                                    <i data-lucide="qr-code"></i>
+                                    <h3>Quick Check-In</h3>
+                                </div>
+                                <span class="status-indicator active" id="cust-checkin-status-indicator">Active</span>
+                            </div>
+                            
+                            <div class="card-body check-in-body">
+                                <div class="qr-container-outer">
+                                    <div class="qr-scanner-line"></div>
+                                    <div class="qr-code-placeholder" id="qr-display">
+                                        <!-- Will display animated QR design/Scanner -->
+                                        <div class="qr-scanner-visual">
+                                            <i data-lucide="scan" class="qr-scan-icon"></i>
+                                            <span class="qr-scan-text">IRON-NATION</span>
+                                        </div>
+                                    </div>
+                                    <div class="checkin-success-overlay" id="checkin-success-overlay">
+                                        <div class="success-icon-wrapper">
+                                            <i data-lucide="check-circle-2"></i>
+                                        </div>
+                                        <h4>Checked In Successfully!</h4>
+                                        <p id="checkin-time-stamp">9:41 AM</p>
+                                    </div>
+                                </div>
+                                
+                                <button id="btn-self-checkin" class="primary-btn btn-full" onclick="performCustomerCheckIn()">
+                                    <i data-lucide="scan-line"></i> Tap to Check In
+                                </button>
+                                <p class="card-hint">Check in once per day when entering the facility.</p>
+                            </div>
+                        </div>
+
+                        <!-- Membership & Attendance Details -->
+                        <div class="right-column-grid">
+                            
+                            <!-- Membership Info Card -->
+                            <div class="glass-card membership-status-card">
+                                <div class="card-header">
+                                    <div class="header-title">
+                                        <i data-lucide="credit-card"></i>
+                                        <h3>My Membership</h3>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="membership-details">
+                                        <div class="plan-details-main">
+                                            <h4 id="cust-plan-name">Premium Tier</h4>
+                                            <span class="badge active" id="cust-membership-status">Active</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="label">Member ID:</span>
+                                            <span class="value" id="cust-member-id">#APX-1082</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="label">Expires on:</span>
+                                            <span class="value" id="cust-expiry-date">Oct 12, 2026</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="label">Renewal Price:</span>
+                                            <span class="value" id="cust-plan-price">$49.99/mo</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="membership-progress-section">
+                                        <div class="progress-labels">
+                                            <span>Membership Progress</span>
+                                            <span id="cust-progress-percent">72%</span>
+                                        </div>
+                                        <div class="progress-bar-bg">
+                                            <div class="progress-bar-fill" id="cust-progress-fill" style="width: 72%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Attendance History (Customer) -->
+                            <div class="glass-card personal-history-card">
+                                <div class="card-header">
+                                    <div class="header-title">
+                                        <i data-lucide="calendar"></i>
+                                        <h3>Recent History</h3>
+                                    </div>
+                                    <span class="header-action-text" id="cust-attendance-count">0 check-ins this month</span>
+                                </div>
+                                <div class="card-body scrollable-body">
+                                    <ul class="attendance-list-compact" id="cust-attendance-list">
+                                        <!-- Populated dynamically -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= ADMIN PORTAL ================= -->
+            <section id="portal-admin" class="portal-section">
+                <div class="admin-layout">
+                    <!-- Admin Navigation -->
+                    <aside class="admin-sidebar">
+                        <nav class="admin-nav">
+                            <button id="admin-nav-dashboard" class="admin-nav-item active" onclick="switchAdminTab('dashboard')">
+                                <i data-lucide="layout-dashboard"></i> Dashboard
+                            </button>
+                            <button id="admin-nav-members" class="admin-nav-item" onclick="switchAdminTab('members')">
+                                <i data-lucide="users"></i> Members Directory
+                            </button>
+                            <button id="admin-nav-attendance" class="admin-nav-item" onclick="switchAdminTab('attendance')">
+                                <i data-lucide="calendar-check-2"></i> Attendance Log
+                            </button>
+                            <button id="admin-nav-plans" class="admin-nav-item" onclick="switchAdminTab('plans')">
+                                <i data-lucide="package"></i> Membership Plans
+                            </button>
+                        </nav>
+                        <div class="sidebar-footer">
+                            <div class="gym-capacity-meter">
+                                <div class="capacity-header">
+                                    <span>Today's Check-ins</span>
+                                    <span id="live-occupancy-val">0 / 0</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" id="live-occupancy-fill" style="width: 10%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Admin Content Area -->
+                    <div class="admin-view-panel">
+                        
+                        <!-- TAB: DASHBOARD -->
+                        <div id="admin-tab-dashboard" class="admin-tab-content active">
+                            <div class="tab-header">
+                                <div>
+                                    <h2>Manager Dashboard</h2>
+                                    <p>Real-time analytics and overview of facility activity.</p>
+                                </div>
+                                <div class="tab-actions">
+                                    <button class="secondary-btn" onclick="refreshDashboardStats()">
+                                        <i data-lucide="refresh-cw"></i> Refresh Stats
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Key Metrics Grid -->
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-icon bg-red">
+                                        <i data-lucide="users"></i>
+                                    </div>
+                                    <div class="metric-details">
+                                        <span class="metric-title">Total Members</span>
+                                        <h3 class="metric-value" id="metric-total-members">0</h3>
+                                        <span class="metric-trend positive"><i data-lucide="trending-up"></i> Active tracking</span>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-icon bg-emerald">
+                                        <i data-lucide="door-open"></i>
+                                    </div>
+                                    <div class="metric-details">
+                                        <span class="metric-title">Active Members</span>
+                                        <h3 class="metric-value" id="metric-active-members">0</h3>
+                                        <span class="metric-trend positive"><i data-lucide="user-check"></i> Live statuses</span>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-icon bg-amber">
+                                        <i data-lucide="user-minus"></i>
+                                    </div>
+                                    <div class="metric-details">
+                                        <span class="metric-title">Expirations (7d)</span>
+                                        <h3 class="metric-value" id="metric-expiring-members">0</h3>
+                                        <span class="metric-trend neutral"><i data-lucide="alert-triangle"></i> Needs review</span>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-icon bg-blue">
+                                        <i data-lucide="dollar-sign"></i>
+                                    </div>
+                                    <div class="metric-details">
+                                        <span class="metric-title">Monthly Revenue</span>
+                                        <h3 class="metric-value" id="metric-revenue">₹0</h3>
+                                        <span class="metric-trend positive"><i data-lucide="trending-up"></i> Projected</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Analytics & Dynamic Updates -->
+                            <div class="dashboard-analytics-section">
+                                <!-- Attendance Visual Chart -->
+                                <div class="glass-card chart-card">
+                                    <div class="card-header">
+                                        <div class="header-title">
+                                            <i data-lucide="activity"></i>
+                                            <h3>Weekly Check-In Trend</h3>
+                                        </div>
+                                    </div>
+                                    <div class="card-body chart-body">
+                                        <!-- SVG Responsive Bar/Line Chart -->
+                                        <div class="svg-chart-container" id="attendance-weekly-chart">
+                                            <!-- Generated dynamically by JS -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Membership Plan Distribution -->
+                                <div class="glass-card distribution-card">
+                                    <div class="card-header">
+                                        <div class="header-title">
+                                            <i data-lucide="pie-chart"></i>
+                                            <h3>Membership Breakdown</h3>
+                                        </div>
+                                    </div>
+                                    <div class="card-body flex-body">
+                                        <div class="pie-chart-wrapper" id="membership-pie-chart">
+                                            <!-- SVG Pie Chart generated dynamically -->
+                                        </div>
+                                        <div class="pie-legend" id="membership-pie-legend">
+                                            <!-- Legend list -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Grid: Live Activity & Quick Checkin -->
+                            <div class="dashboard-bottom-grid">
+                                <!-- Live Checkins Log -->
+                                <div class="glass-card live-log-card">
+                                    <div class="card-header">
+                                        <div class="header-title">
+                                            <i data-lucide="zap"></i>
+                                            <h3>Live Check-Ins (Today)</h3>
+                                        </div>
+                                        <span class="badge live-badge"><span class="pulse-dot"></span> Live</span>
+                                    </div>
+                                    <div class="card-body scrollable-body">
+                                        <div class="live-activity-list" id="admin-live-activity-list">
+                                            <!-- Populated dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Admin Check-in Tool -->
+                                <div class="glass-card quick-action-card">
+                                    <div class="card-header">
+                                        <div class="header-title">
+                                            <i data-lucide="fingerprint"></i>
+                                            <h3>Manual Desk Check-In</h3>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="quick-description">Select a member to manually check them in at the front desk.</p>
+                                        <div class="form-group">
+                                            <label for="admin-select-quick-member">Select Member</label>
+                                            <select id="admin-select-quick-member" class="form-select">
+                                                <!-- Dynamic list -->
+                                            </select>
+                                        </div>
+                                        <button class="primary-btn btn-full" onclick="performAdminManualCheckIn()">
+                                            <i data-lucide="check-square"></i> Check In Member
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: MEMBER DIRECTORY -->
+                        <div id="admin-tab-members" class="admin-tab-content">
+                            <div class="tab-header">
+                                <div>
+                                    <h2>Members Directory</h2>
+                                    <p>Register, modify, and delete member profiles.</p>
+                                </div>
+                                <button class="primary-btn" onclick="openMemberModal()">
+                                    <i data-lucide="user-plus"></i> Add New Member
+                                </button>
+                            </div>
+
+                            <!-- Directory Controls -->
+                            <div class="directory-toolbar">
+                                <div class="search-box">
+                                    <i data-lucide="search" class="search-icon"></i>
+                                    <input type="text" id="member-search-input" placeholder="Search by name, ID, or phone..." oninput="filterMembers()">
+                                </div>
+                                <div class="filters-row">
+                                    <div class="filter-group">
+                                        <label for="filter-plan">Plan Type</label>
+                                        <select id="filter-plan" onchange="filterMembers()">
+                                            <option value="all">All Plans</option>
+                                            <!-- Options populated dynamically -->
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="filter-status">Status</label>
+                                        <select id="filter-status" onchange="filterMembers()">
+                                            <option value="all">All Statuses</option>
+                                            <option value="active">Active</option>
+                                            <option value="expiring">Expiring Soon</option>
+                                            <option value="expired">Expired</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Member Directory Grid -->
+                            <div class="member-directory-container">
+                                <div class="table-responsive">
+                                    <table class="data-table" id="members-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Member</th>
+                                                <th>ID</th>
+                                                <th>Contact</th>
+                                                <th>Membership Plan</th>
+                                                <th>Expires On</th>
+                                                <th>Status</th>
+                                                <th class="actions-header">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="members-table-body">
+                                            <!-- Dynamic content -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="empty-state" id="members-empty-state" style="display: none;">
+                                    <i data-lucide="users-round" class="empty-icon"></i>
+                                    <h4>No members found</h4>
+                                    <p>Try refining your search or filter settings.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: ATTENDANCE RECORDS -->
+                        <div id="admin-tab-attendance" class="admin-tab-content">
+                            <div class="tab-header">
+                                <div>
+                                    <h2>Attendance Logs</h2>
+                                    <p>View historical records of member check-ins.</p>
+                                </div>
+                                <button class="secondary-btn" onclick="clearAttendanceHistory()">
+                                    <i data-lucide="trash-2"></i> Clear Logs
+                                </button>
+                            </div>
+
+                            <!-- Search / Toolbar -->
+                            <div class="directory-toolbar">
+                                <div class="search-box">
+                                    <i data-lucide="search" class="search-icon"></i>
+                                    <input type="text" id="attendance-search-input" placeholder="Search logs by member name..." oninput="filterAttendanceLogs()">
+                                </div>
+                                <div class="filters-row">
+                                    <div class="filter-group">
+                                        <label for="filter-attendance-date">Filter by Day</label>
+                                        <select id="filter-attendance-date" onchange="filterAttendanceLogs()">
+                                            <option value="all">All Time</option>
+                                            <option value="today">Today</option>
+                                            <option value="yesterday">Yesterday</option>
+                                            <option value="week">Past 7 Days</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Logs Container -->
+                            <div class="attendance-logs-container">
+                                <div class="table-responsive">
+                                    <table class="data-table" id="attendance-logs-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Time</th>
+                                                <th>Member Name</th>
+                                                <th>Member ID</th>
+                                                <th>Plan Tier</th>
+                                                <th>Check-in Method</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="attendance-logs-table-body">
+                                            <!-- Dynamic content -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="empty-state" id="attendance-empty-state" style="display: none;">
+                                    <i data-lucide="calendar-x" class="empty-icon"></i>
+                                    <h4>No logs found</h4>
+                                    <p>No check-ins match the current filter criteria.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: MEMBERSHIP PLANS -->
+                        <div id="admin-tab-plans" class="admin-tab-content">
+                            <div class="tab-header">
+                                <div>
+                                    <h2>Membership Plans</h2>
+                                    <p>Create and adjust pricing models and gym package options.</p>
+                                </div>
+                            </div>
+
+                            <div class="plans-management-layout">
+                                <!-- Create Plan Form -->
+                                <div class="glass-card form-card">
+                                    <div class="card-header">
+                                        <div class="header-title">
+                                            <i data-lucide="plus-circle"></i>
+                                            <h3 id="plan-form-title">Create New Plan</h3>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="plan-form" onsubmit="handlePlanFormSubmit(event)">
+                                            <input type="hidden" id="edit-plan-id" value="">
+                                            <div class="form-group">
+                                                <label for="plan-name">Plan Name</label>
+                                                <input type="text" id="plan-name" required placeholder="e.g., Diamond VIP">
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group flex-1">
+                                                    <label for="plan-price">Price (₹)</label>
+                                                    <input type="number" id="plan-price" required min="0" step="1" placeholder="999">
+                                                </div>
+                                                <div class="form-group flex-1">
+                                                    <label for="plan-duration">Duration (Months)</label>
+                                                    <input type="number" id="plan-duration" required min="1" max="12" value="1">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="plan-features">Features / Perks (Comma separated)</label>
+                                                <textarea id="plan-features" rows="3" placeholder="Access to all areas, 24/7 keycard, Free towel service"></textarea>
+                                            </div>
+                                            <div class="form-actions">
+                                                <button type="button" class="secondary-btn" id="btn-cancel-plan-edit" style="display: none;" onclick="resetPlanForm()">Cancel</button>
+                                                <button type="submit" class="primary-btn flex-1" id="btn-save-plan">Save Plan</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Plans List Grid -->
+                                <div class="plans-list-container">
+                                    <div class="plans-grid" id="plans-card-grid">
+                                        <!-- Dynamic cards -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MEMBER MODAL (Add/Edit) -->
+    <div class="modal-backdrop" id="member-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="member-modal-title">Register Member</h3>
+                <button class="modal-close-btn" onclick="closeMemberModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="member-form" onsubmit="handleMemberFormSubmit(event)">
+                    <input type="hidden" id="edit-member-id" value="">
+                    
+                    <div class="form-group">
+                        <label for="member-fullname">Full Name</label>
+                        <input type="text" id="member-fullname" required placeholder="John Doe">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="member-phone">Phone Number</label>
+                            <input type="tel" id="member-phone" required placeholder="+91 98765 43210">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="member-email">Email Address</label>
+                            <input type="email" id="member-email" required placeholder="john@example.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="member-plan-select">Membership Plan</label>
+                            <select id="member-plan-select" required>
+                                <!-- Dynamic options -->
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="member-status-select">Account Status</label>
+                            <select id="member-status-select" required>
+                                <option value="active">Active</option>
+                                <option value="expiring">Expiring Soon</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="member-avatar">Profile Accent Color</label>
+                        <div class="color-options-container">
+                            <label class="color-radio">
+                                <input type="radio" name="avatar-color" value="#7C3AED" checked>
+                                <span style="background-color: #7C3AED;"></span>
+                            </label>
+                            <label class="color-radio">
+                                <input type="radio" name="avatar-color" value="#10B981">
+                                <span style="background-color: #10B981;"></span>
+                            </label>
+                            <label class="color-radio">
+                                <input type="radio" name="avatar-color" value="#3B82F6">
+                                <span style="background-color: #3B82F6;"></span>
+                            </label>
+                            <label class="color-radio">
+                                <input type="radio" name="avatar-color" value="#F59E0B">
+                                <span style="background-color: #F59E0B;"></span>
+                            </label>
+                            <label class="color-radio">
+                                <input type="radio" name="avatar-color" value="#EF4444">
+                                <span style="background-color: #EF4444;"></span>
+                            </label>
+                            <label class="color-radio">
+                                <input type="radio" name="avatar-color" value="#EC4899">
+                                <span style="background-color: #EC4899;"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="secondary-btn" onclick="closeMemberModal()">Cancel</button>
+                        <button type="submit" class="primary-btn">Save Member Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTROLLER -->
+    <script src="app.js"></script>
+    <script>
+        // Init Lucide Icons on load
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
