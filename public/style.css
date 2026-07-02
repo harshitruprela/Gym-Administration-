@@ -1683,6 +1683,73 @@ textarea:focus {
         padding: 1.75rem;
         margin: 1rem;
     }
+
+    /* Admin Dashboard Mobile Enhancements */
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .metric-card {
+        padding: 0.75rem !important;
+        gap: 0.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .metric-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .metric-icon i {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .metric-value {
+        font-size: 1.2rem;
+    }
+    
+    .metric-title {
+        font-size: 0.75rem;
+    }
+    
+    .metric-trend {
+        display: none;
+    }
+
+    .tab-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .tab-actions {
+        width: 100%;
+    }
+    
+    .tab-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .flex-body {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1rem;
+    }
+    
+    .pie-chart-wrapper {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .pie-legend {
+        width: 100%;
+    }
 }
 
 /* ================= AUTHENTICATION VIEW STYLES ================= */
