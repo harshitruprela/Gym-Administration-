@@ -376,21 +376,15 @@ async function performCustomerCheckIn() {
 // Dynamic statistic outputs
 function renderAdminDashboard() {
     const totalMembers = state.members.length;
-    const activeMembers = state.members.filter(m => m.status === 'active').length;
+    const activeMembers = state.members.filter(m => m.status === 'active' || m.status === 'expiring').length;
     
     // Expiring within 7 days
-    const expiringSoon = state.members.filter(m => {
-        if (m.status !== 'active') return false;
-        const exp = new Date(m.expiryDate);
-        const diffTime = exp - SYSTEM_TODAY;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays >= 0 && diffDays <= 7;
-    }).length;
+    const expiringSoon = state.members.filter(m => m.status === 'expiring').length;
     
     // Sum active pricing streams
     let monthlyRevenue = 0;
     state.members.forEach(m => {
-        if (m.status === 'active') {
+        if (m.status === 'active' || m.status === 'expiring') {
             const plan = state.plans.find(p => p.id === m.planId);
             if (plan) {
                 // If it is an annual plan, amortize monthly
