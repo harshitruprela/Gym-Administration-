@@ -8,6 +8,9 @@ let state = {
     checkins: []
 };
 
+// Track sent WhatsApp reminders in current session
+const sentAlertsToday = new Set();
+
 // Anchor date for calculation (Dynamic real-time)
 const SYSTEM_TODAY = new Date();
 
@@ -755,6 +758,9 @@ function renderMemberDirectory() {
             <td><span class="badge ${m.status}">${m.status}</span></td>
             <td>
                 <div class="actions-cell">
+                    <button class="btn-icon whatsapp-action ${sentAlertsToday.has(m.id) ? 'sent' : ''}" onclick="sendWhatsAppRenewalReminder('${m.id}')" title="${sentAlertsToday.has(m.id) ? 'WhatsApp Alert Sent' : 'Send WhatsApp Alert'}">
+                        <i data-lucide="${sentAlertsToday.has(m.id) ? 'check-check' : 'message-circle'}"></i>
+                    </button>
                     <button class="btn-icon checkin-action" onclick="checkinMemberFromDirectory('${m.id}')" title="Check In Now" ${m.status === 'expired' ? 'disabled' : ''}>
                         <i data-lucide="scan"></i>
                     </button>
@@ -840,6 +846,209 @@ async function deleteMember(memberId) {
             alert("Error removing profile: " + e.message);
         }
     }
+}
+
+// ================= WHATSAPP RENEWAL ALERTS LOGIC =================
+
+// Retrieve or default the Gym Admin WhatsApp Contact Number (default: '0000')
+function getAdminWhatsAppNumber() {
+    return localStorage.getItem('gym_admin_whatsapp_no') || '0000';
+}
+
+function updateAdminWhatsAppNumber(val) {
+    if (val !== undefined && val !== null) {
+        localStorage.setItem('gym_admin_whatsapp_no', val.trim() || '0000');
+        renderAlertTemplatePreview();
+    }
+}
+
+function saveAdminWhatsAppNumber() {
+    const input = document.getElementById("admin-source-whatsapp");
+    if (input) {
+        updateAdminWhatsAppNumber(input.value);
+        alert(`Admin WhatsApp Contact Number saved as "${getAdminWhatsAppNumber()}"`);
+    }
+}
+
+function renderAlertTemplatePreview() {
+    const previewEl = document.getElementById("alert-template-preview");
+    if (!previewEl) return;
+    const adminPhone = getAdminWhatsAppNumber();
+    previewEl.textContent = `Hello!
+
+Greetings from Iron Nation Gym.
+
+This is a friendly reminder that your membership is expiring in xx days on xyz.
+
+Please renew your subscription at the front desk or contact us on WhatsApp at ${adminPhone} to continue your workout sessions without interruption! 💪
+
+Stay fit,
+Iron Nation Gym`;
+}
+
+// Format phone numbers to clean international format for WhatsApp (defaults to 91 for Indian 10-digit numbers)
+function formatWhatsAppPhone(phone) {
+    if (!phone) return null;
+    let clean = String(phone).replace(/\D/g, '');
+    if (!clean) return null;
+    
+    // Standard 10-digit Indian mobile number
+    if (clean.length === 10) {
+        return '91' + clean;
+    }
+    // 11 digits starting with 0
+    if (clean.length === 11 && clean.startsWith('0')) {
+        return '91' + clean.substring(1);
+    }
+    // Already has country code 91
+    if (clean.length === 12 && clean.startsWith('91')) {
+        return clean;
+    }
+    return clean;
+}
+
+// Generate personalized WhatsApp message based on member status and expiry date
+function generateRenewalWhatsAppMessage(member) {
+    const expDate = new Date(member.expiryDate);
+    const dateFormatted = expDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    const adminPhone = getAdminWhatsAppNumber();
+    
+    const today = new Date();
+    const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const expClean = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate());
+    const diffDays = Math.ceil((expClean - todayDate) / (1000 * 60 * 60 * 24));
+    
+    let expirationSentence = "";
+    if (member.status === 'expired' || diffDays < 0) {
+        expirationSentence = `This is a friendly reminder that your membership expired on ${dateFormatted}.`;
+    } else if (diffDays === 0) {
+        expirationSentence = `This is a friendly reminder that your membership is expiring today on ${dateFormatted}.`;
+    } else {
+        const daysLabel = diffDays === 1 ? "1 day" : `${diffDays} days`;
+        expirationSentence = `This is a friendly reminder that your membership is expiring in ${daysLabel} on ${dateFormatted}.`;
+    }
+    
+    return `Hello!\n\nGreetings from Iron Nation Gym.\n\n${expirationSentence}\n\nPlease renew your subscription at the front desk or contact us on WhatsApp at ${adminPhone} to continue your workout sessions without interruption! 💪\n\nStay fit,\nIron Nation Gym`;
+}
+
+// Open native WhatsApp Web / App pre-filled chat
+function sendWhatsAppRenewalReminder(memberId) {
+    const member = state.members.find(m => m.id === memberId);
+    if (!member) return;
+    
+    const cleanPhone = formatWhatsAppPhone(member.phone);
+    if (!cleanPhone) {
+        alert(`Cannot send WhatsApp alert: Member ${member.name} does not have a valid phone number.`);
+        return;
+    }
+    
+    const message = generateRenewalWhatsAppMessage(member);
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    
+    // Track alert sent for current session
+    sentAlertsToday.add(memberId);
+    
+    // Open in new tab/window
+    window.open(url, '_blank');
+    
+    // Refresh directory and alerts list to show checkmarks
+    renderMemberDirectory();
+    renderRenewalAlertsList();
+}
+
+// Open and render WhatsApp Renewal Alerts modal
+function openRenewalAlertsModal() {
+    const modal = document.getElementById("renewal-alerts-modal");
+    if (!modal) return;
+    
+    // Populate admin WhatsApp source number
+    const adminInput = document.getElementById("admin-source-whatsapp");
+    if (adminInput) {
+        adminInput.value = getAdminWhatsAppNumber();
+    }
+    renderAlertTemplatePreview();
+    
+    renderRenewalAlertsList();
+    modal.classList.add("show");
+}
+
+function closeRenewalAlertsModal() {
+    const modal = document.getElementById("renewal-alerts-modal");
+    if (modal) modal.classList.remove("show");
+}
+
+function renderRenewalAlertsList() {
+    const list = document.getElementById("renewal-alerts-list");
+    const emptyState = document.getElementById("renewal-alerts-empty");
+    if (!list) return;
+    
+    list.innerHTML = "";
+    
+    // Filter members with status expiring or expired
+    const alertMembers = state.members.filter(m => m.status === 'expiring' || m.status === 'expired');
+    
+    // Sort: expiring first (ascending days left), then expired
+    alertMembers.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+    
+    if (alertMembers.length === 0) {
+        list.style.display = "none";
+        if (emptyState) emptyState.style.display = "flex";
+        return;
+    }
+    
+    list.style.display = "flex";
+    if (emptyState) emptyState.style.display = "none";
+    
+    const today = new Date();
+    const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    alertMembers.forEach(m => {
+        const plan = state.plans.find(p => p.id === m.planId) || { name: "Membership" };
+        const expDate = new Date(m.expiryDate);
+        const expClean = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate());
+        const diffDays = Math.ceil((expClean - todayDate) / (1000 * 60 * 60 * 24));
+        const initials = m.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        
+        let daysBadge = "";
+        if (diffDays < 0) {
+            daysBadge = `<span class="badge expired" style="font-size: 0.68rem;">Expired (${Math.abs(diffDays)}d ago)</span>`;
+        } else if (diffDays === 0) {
+            daysBadge = `<span class="badge expiring" style="font-size: 0.68rem;">Expires Today</span>`;
+        } else {
+            daysBadge = `<span class="badge expiring" style="font-size: 0.68rem;">${diffDays} day${diffDays !== 1 ? 's' : ''} left</span>`;
+        }
+        
+        const isSent = sentAlertsToday.has(m.id);
+        const dateFormatted = expDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        
+        const div = document.createElement("div");
+        div.className = "renewal-alert-item";
+        div.innerHTML = `
+            <div class="renewal-alert-user">
+                <div class="activity-user-avatar" style="background-color: ${m.avatarColor || '#DC2626'}; width: 40px; height: 40px; font-size: 0.85rem;">
+                    ${initials}
+                </div>
+                <div class="renewal-alert-info">
+                    <div class="renewal-alert-name">
+                        <span>${m.name}</span>
+                        ${daysBadge}
+                    </div>
+                    <div class="renewal-alert-meta">
+                        ${m.phone} • ${plan.name} • Expires: ${dateFormatted}
+                    </div>
+                </div>
+            </div>
+            <div class="renewal-alert-actions">
+                <button class="whatsapp-send-btn ${isSent ? 'sent' : ''}" onclick="sendWhatsAppRenewalReminder('${m.id}')" title="Send WhatsApp alert to ${m.name}">
+                    <i data-lucide="${isSent ? 'check-check' : 'message-circle'}"></i>
+                    <span>${isSent ? 'Sent' : 'Send WhatsApp'}</span>
+                </button>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+    
+    if (window.lucide) lucide.createIcons();
 }
 
 // Modal dialog forms CRUD

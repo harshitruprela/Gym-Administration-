@@ -271,14 +271,14 @@
                                         <span class="metric-trend positive"><i data-lucide="user-check"></i> Live statuses</span>
                                     </div>
                                 </div>
-                                <div class="metric-card">
+                                <div class="metric-card" onclick="openRenewalAlertsModal()" style="cursor: pointer;" title="Click to view & send WhatsApp renewal alerts">
                                     <div class="metric-icon bg-amber">
                                         <i data-lucide="user-minus"></i>
                                     </div>
                                     <div class="metric-details">
                                         <span class="metric-title">Expirations (7d)</span>
                                         <h3 class="metric-value" id="metric-expiring-members">0</h3>
-                                        <span class="metric-trend neutral"><i data-lucide="alert-triangle"></i> Needs review</span>
+                                        <span class="metric-trend neutral"><i data-lucide="message-circle"></i> Send WhatsApp Alerts</span>
                                     </div>
                                 </div>
                                 <div class="metric-card">
@@ -379,9 +379,14 @@
                                     <h2>Members Directory</h2>
                                     <p>Register, modify, and delete member profiles.</p>
                                 </div>
-                                <button class="primary-btn" onclick="openMemberModal()">
-                                    <i data-lucide="user-plus"></i> Add New Member
-                                </button>
+                                <div class="tab-actions">
+                                    <button class="secondary-btn" onclick="openRenewalAlertsModal()" title="Review & Send WhatsApp Alerts to expiring/expired members">
+                                        <i data-lucide="message-circle" style="color: #25D366;"></i> WhatsApp Alerts
+                                    </button>
+                                    <button class="primary-btn" onclick="openMemberModal()">
+                                        <i data-lucide="user-plus"></i> Add New Member
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Directory Controls -->
@@ -644,6 +649,72 @@
                         <button type="submit" class="primary-btn">Save Member Profile</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- WHATSAPP RENEWAL ALERTS MODAL -->
+    <div class="modal-backdrop" id="renewal-alerts-modal">
+        <div class="modal-container modal-lg">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(37, 211, 102, 0.12); display: flex; align-items: center; justify-content: center; color: #25D366; border: 1px solid rgba(37, 211, 102, 0.25);">
+                        <i data-lucide="message-circle" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.15rem; margin: 0; color: white;">WhatsApp Renewal Alerts</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Notify members with expiring (≤7 days) or expired memberships</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="closeRenewalAlertsModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Admin WhatsApp Source Configuration -->
+                <div class="admin-wa-config-box" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <i data-lucide="phone-call" style="width: 16px; height: 16px; color: #25D366;"></i>
+                        <span style="font-size: 0.85rem; color: white; font-weight: 500;">Admin / Gym WhatsApp Contact No.:</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="text" id="admin-source-whatsapp" value="0000" placeholder="e.g. 0000 or +91..." style="background: var(--bg-primary); border: 1px solid var(--border); color: white; padding: 0.4rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.85rem; width: 150px;" oninput="updateAdminWhatsAppNumber(this.value)">
+                        <button type="button" class="secondary-btn" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" onclick="saveAdminWhatsAppNumber()">Save</button>
+                    </div>
+                </div>
+
+                <!-- Custom Message Template Preview Box -->
+                <div class="alert-template-box">
+                    <div class="template-header">
+                        <span style="font-size: 0.82rem; font-weight: 600; color: white;">Message Template Preview</span>
+                        <span class="template-badge">Personalized Per Member</span>
+                    </div>
+                    <div class="template-preview" id="alert-template-preview">
+                        Hello!
+
+                        Greetings from Iron Nation Gym.
+
+                        This is a friendly reminder that your membership is expiring in xx days on xyz.
+
+                        Please renew your subscription at the front desk or contact us on WhatsApp at 0000 to continue your workout sessions without interruption! 💪
+
+                        Stay fit,
+                        Iron Nation Gym
+                    </div>
+                </div>
+
+                <!-- List of Expiring & Expired Members -->
+                <div class="renewal-alerts-list" id="renewal-alerts-list">
+                    <!-- Populated dynamically -->
+                </div>
+                <div class="empty-state" id="renewal-alerts-empty" style="display: none; padding: 2rem 0;">
+                    <i data-lucide="check-circle-2" class="empty-icon" style="color: var(--success);"></i>
+                    <h4>All Caught Up!</h4>
+                    <p>No memberships are currently expiring in 7 days or expired.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="secondary-btn" onclick="closeRenewalAlertsModal()">Close</button>
             </div>
         </div>
     </div>
