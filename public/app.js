@@ -873,17 +873,18 @@ function saveAdminWhatsAppNumber() {
 function renderAlertTemplatePreview() {
     const previewEl = document.getElementById("alert-template-preview");
     if (!previewEl) return;
-    const adminPhone = getAdminWhatsAppNumber();
     previewEl.textContent = `Hello!
 
 Greetings from Iron Nation Gym.
 
 This is a friendly reminder that your membership is expiring in xx days on xyz.
 
-Please renew your subscription at the front desk or contact us on WhatsApp at ${adminPhone} to continue your workout sessions without interruption! 💪
+Please renew your subscription at the front desk at the earliest to continue your workout sessions without interruption! 💪
+
+Your timely payments helps us manage the gym smoothly and continue providing you with the best facilities and services. We genuinely appreciate your cooperation, understanding and support. 
 
 Stay fit,
-Iron Nation Gym`;
+Team Iron Nation Gym`;
 }
 
 // Format phone numbers to clean international format for WhatsApp (defaults to 91 for Indian 10-digit numbers)
@@ -911,7 +912,6 @@ function formatWhatsAppPhone(phone) {
 function generateRenewalWhatsAppMessage(member) {
     const expDate = new Date(member.expiryDate);
     const dateFormatted = expDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-    const adminPhone = getAdminWhatsAppNumber();
     
     const today = new Date();
     const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -928,7 +928,7 @@ function generateRenewalWhatsAppMessage(member) {
         expirationSentence = `This is a friendly reminder that your membership is expiring in ${daysLabel} on ${dateFormatted}.`;
     }
     
-    return `Hello!\n\nGreetings from Iron Nation Gym.\n\n${expirationSentence}\n\nPlease renew your subscription at the front desk or contact us on WhatsApp at ${adminPhone} to continue your workout sessions without interruption! 💪\n\nStay fit,\nIron Nation Gym`;
+    return `Hello!\n\nGreetings from Iron Nation Gym.\n\n${expirationSentence}\n\nPlease renew your subscription at the front desk at the earliest to continue your workout sessions without interruption! 💪\n\nYour timely payments helps us manage the gym smoothly and continue providing you with the best facilities and services. We genuinely appreciate your cooperation, understanding and support.\n\nStay fit,\nTeam Iron Nation Gym`;
 }
 
 // Open native WhatsApp Web / App pre-filled chat
