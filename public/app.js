@@ -956,7 +956,6 @@ function sendWhatsAppRenewalReminder(memberId) {
     renderRenewalAlertsList();
 }
 
-// Open and render WhatsApp Renewal Alerts modal
 function openRenewalAlertsModal() {
     const modal = document.getElementById("renewal-alerts-modal");
     if (!modal) return;
@@ -967,9 +966,15 @@ function openRenewalAlertsModal() {
         adminInput.value = getAdminWhatsAppNumber();
     }
     renderAlertTemplatePreview();
-    
     renderRenewalAlertsList();
+    
     modal.classList.add("show");
+    
+    // Reset scroll position to top so admin edit box is immediately in view
+    const modalBody = modal.querySelector(".modal-body");
+    if (modalBody) modalBody.scrollTop = 0;
+    
+    if (window.lucide) lucide.createIcons();
 }
 
 function closeRenewalAlertsModal() {
