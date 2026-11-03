@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function handleLoginSubmit(event) {
     event.preventDefault();
     
-    const email = document.getElementById("login-email").value;
+    const serialNo = document.getElementById("login-serial").value.trim();
     const password = document.getElementById("login-password").value;
     const errorMsg = document.getElementById("auth-error");
     const errorText = document.getElementById("auth-error-text");
@@ -89,7 +89,7 @@ async function handleLoginSubmit(event) {
         const res = await fetch('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ serialNo, password })
         });
         
         const data = await res.json();
@@ -706,7 +706,7 @@ function renderMemberDirectory() {
     const filtered = state.members.filter(m => {
         const matchesSearch = m.name.toLowerCase().includes(memberSearchQuery) || 
                               m.id.toLowerCase().includes(memberSearchQuery) ||
-                              m.email.toLowerCase().includes(memberSearchQuery) ||
+                              (m.serialNo || '').toLowerCase().includes(memberSearchQuery) ||
                               m.phone.toLowerCase().includes(memberSearchQuery);
         const matchesPlan = memberPlanFilter === 'all' || m.planId === memberPlanFilter;
         const matchesStatus = memberStatusFilter === 'all' || m.status === memberStatusFilter;
@@ -747,7 +747,7 @@ function renderMemberDirectory() {
                     </div>
                     <div>
                         <div class="member-cell-name">${m.name}</div>
-                        <div class="member-cell-sub">${m.email}</div>
+                        <div class="member-cell-sub">S/N: ${m.serialNo || '—'}</div>
                     </div>
                 </div>
             </td>
@@ -1083,7 +1083,7 @@ function openMemberModal(memberId = null) {
         document.getElementById("edit-member-id").value = m.id;
         document.getElementById("member-fullname").value = m.name;
         document.getElementById("member-phone").value = m.phone;
-        document.getElementById("member-email").value = m.email;
+        document.getElementById("member-serial").value = m.serialNo || '';
         document.getElementById("member-plan-select").value = m.planId;
         document.getElementById("member-status-select").value = m.status;
         
@@ -1117,7 +1117,7 @@ async function handleMemberFormSubmit(event) {
     const editId = document.getElementById("edit-member-id").value;
     const name = document.getElementById("member-fullname").value;
     const phone = document.getElementById("member-phone").value;
-    const email = document.getElementById("member-email").value;
+    const serialNo = document.getElementById("member-serial").value.trim();
     const startDate = document.getElementById("member-start-date").value;
     const planId = document.getElementById("member-plan-select").value;
     const status = document.getElementById("member-status-select").value;
@@ -1133,7 +1133,7 @@ async function handleMemberFormSubmit(event) {
                 const updatedFields = {
                     name,
                     phone,
-                    email,
+                    serialNo,
                     status,
                     avatarColor
                 };
@@ -1185,7 +1185,7 @@ async function handleMemberFormSubmit(event) {
             const newMember = {
                 id: newId,
                 name: name,
-                email: email,
+                serialNo: serialNo,
                 phone: phone,
                 startDate: startDate,
                 planId: planId,

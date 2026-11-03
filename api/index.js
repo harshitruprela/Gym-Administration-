@@ -61,17 +61,15 @@ function computeStatus(expiryDate) {
 // AUTHENTICATION LOGIN ROUTE
 app.post('/api/auth/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({ error: "Email and password are required." });
-        }
+        const { serialNo, password } = req.body;
         
-        // 1. Check Admin Credentials (must be set via environment variables for security)
+        // 1. Check Admin Credentials via email (env vars — admin login uses email, not serialNo)
         const adminEmail = process.env.ADMIN_EMAIL;
         const adminPassword = process.env.ADMIN_PASSWORD;
         
+        // Admin may still pass email in the serialNo field for backward compat — check both
         if (adminEmail && adminPassword && 
-            email.toLowerCase() === adminEmail.toLowerCase() && 
+            serialNo && serialNo.toLowerCase() === adminEmail.toLowerCase() && 
             password === adminPassword) {
             return res.json({
                 success: true,
@@ -83,9 +81,13 @@ app.post('/api/auth/login', async (req, res) => {
             });
         }
         
-        // 2. Check Customer Credentials (Password is Member ID)
+        if (!serialNo || !password) {
+            return res.status(400).json({ error: "Serial No. and APX Member ID are required." });
+        }
+        
+        // 2. Check Customer Credentials — match by serialNo, password is Member ID
         const members = await db.getMembers();
-        const member = members.find(m => m.email.toLowerCase() === email.toLowerCase());
+        const member = members.find(m => m.serialNo && m.serialNo.toLowerCase() === serialNo.toLowerCase());
         
         if (member && member.id === password) {
             member.status = computeStatus(member.expiryDate);
@@ -97,7 +99,7 @@ app.post('/api/auth/login', async (req, res) => {
         }
         
         // 3. Invalid Credentials
-        return res.status(401).json({ error: "Invalid email address or password/Member ID." });
+        return res.status(401).json({ error: "Invalid Serial No. or APX Member ID." });
     } catch (e) {
         res.status(500).json({ error: "Authentication system error: " + e.message });
     }
@@ -120,8 +122,8 @@ app.get('/api/members', async (req, res) => {
 app.post('/api/members', async (req, res) => {
     try {
         const member = req.body;
-        if (!member.id || !member.name || !member.email) {
-            return res.status(400).json({ error: "Missing required member fields (id, name, email)." });
+        if (!member.id || !member.name || !member.serialNo) {
+            return res.status(400).json({ error: "Missing required member fields (id, name, serialNo)." });
         }
         
         member.status = computeStatus(member.expiryDate);
